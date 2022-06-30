@@ -35,7 +35,6 @@ logging.getLogger("snowflake.connector").setLevel(logging.WARNING)
 DEFAULT_BATCH_SIZE_ROWS = 100000
 DEFAULT_PARALLELISM = 0  # 0 The number of threads used to flush tables
 DEFAULT_MAX_PARALLELISM = 16  # Don't use more than this number of threads by default when flushing streams in parallel
-MAX_MEMORY_THRESHOLD_CHECK_EVERY_N_ROWS = 1000
 
 
 def add_metadata_columns_to_schema(schema_message):
@@ -218,13 +217,9 @@ def persist_lines(
 
             if (
                 max_memory_threshold
-                and total_row_count_all_streams
-                % MAX_MEMORY_THRESHOLD_CHECK_EVERY_N_ROWS
-                == 0
                 and current_memory_consumption_percentage() > max_memory_threshold
             ):
                 flush = True
-                flush_all_streams = True
                 LOGGER.info("Flush triggered by memory threshold")
             elif row_count[stream] >= batch_size_rows:
                 flush = True
